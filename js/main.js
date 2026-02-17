@@ -102,8 +102,6 @@ Vue.component('product-tabs', {
                 @click="selectedTab = tab"
             >{{ tab }}</span>
         </ul>
-        
-        <!-- Вкладка с отзывами -->
         <div v-show="selectedTab === 'Reviews'" class="tab-content">
             <h3>Customer Reviews</h3>
             <p v-if="!reviews.length">There are no reviews yet.</p>
@@ -115,14 +113,11 @@ Vue.component('product-tabs', {
                 </li>
             </ul>
         </div>
-        
-        <!-- Вкладка с формой -->
         <div v-show="selectedTab === 'Make a Review'" class="tab-content">
             <h3>Write a Review</h3>
             <product-review></product-review>
         </div>
-        
-        <!-- Новая вкладка Shipping -->
+       
         <div v-show="selectedTab === 'Shipping'" class="tab-content">
             <h3>Shipping Information</h3>
             <div class="shipping-info">
