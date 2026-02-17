@@ -135,8 +135,6 @@ Vue.component('product-tabs', {
                 <p><strong>Delivery Options:</strong></p>
                 <ul>
                     <li>Standard Shipping (3-5 business days) - {{ shippingCost }}</li>
-                    <li>Express Shipping (1-2 business days) - {{ expressShippingCost }}</li>
-                    <li>Next Day Delivery - {{ nextDayShippingCost }}</li>
                 </ul>
             </div>
         </div>
@@ -145,14 +143,6 @@ Vue.component('product-tabs', {
             <div class="product-details">
                 <p><strong>Product:</strong> {{ product }}</p>
                 <p><strong>Brand:</strong> {{ brand }}</p>
-                <p><strong>Available Colors:</strong></p>
-                <div class="color-swatches">
-                    <div v-for="variant in variants" 
-                         class="color-swatch"
-                         :style="{ backgroundColor: variant.variantColor }"
-                         :title="variant.variantColor">
-                    </div>
-                </div>
                 <p><strong>Materials:</strong></p>
                 <ul>
                     <li v-for="detail in details">{{ detail }}</li>
@@ -171,12 +161,6 @@ Vue.component('product-tabs', {
         shippingCost() {
             return this.premium ? "Free" : "$2.99";
         },
-        expressShippingCost() {
-            return this.premium ? "$4.99" : "$7.99";
-        },
-        nextDayShippingCost() {
-            return this.premium ? "$9.99" : "$14.99";
-        }
     }
 });
 
@@ -303,7 +287,7 @@ Vue.component('product', {
         },
         shipping() {
             if (this.premium) {
-                return "0";
+                return "free";
             } else {
                 return 2.99
             }
