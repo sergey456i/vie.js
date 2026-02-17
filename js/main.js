@@ -1,3 +1,4 @@
+let eventBus = new Vue();
 Vue.component('product-review', {
     template: `
 
@@ -30,13 +31,6 @@ Vue.component('product-review', {
      <option>1</option>
    </select>
  </p>
- <p>
-    <label for="rec"> «Would you recommend this product?»</label>
-    <p>yes</p>
-    <input id="rec" type="radio" value="Yes" v-model="recommended">
-    <p>no</p>
-    <input id="rec" type="radio" value="No" v-model="recommended">
-</p>
 
  <p>
    <input type="submit" value="Submit"> 
@@ -49,33 +43,137 @@ Vue.component('product-review', {
             name: null,
             review: null,
             rating: null,
-            recommended: null,
             errors: []
         }
     },
-    methods:{
+    methods: {
         onSubmit() {
-            if(this.name && this.review && this.rating) {
+            if (this.name && this.review && this.rating) {
                 let productReview = {
                     name: this.name,
                     review: this.review,
-                    rating: this.rating,
-                    recommended:  this.recommended
+                    rating: this.rating
                 }
-                this.$emit('review-submitted', productReview)
+                eventBus.$emit('review-submitted', productReview)
                 this.name = null
                 this.review = null
                 this.rating = null
-                this.recommended = null
             } else {
-                if(!this.name) this.errors.push("Name required.")
-                if(!this.review) this.errors.push("Review required.")
-                if(!this.rating) this.errors.push("Rating required.")
-                if(!this.recommended) this.errors.push("Recommended required.")
+                if (!this.name) this.errors.push("Name required.")
+                if (!this.review) this.errors.push("Review required.")
+                if (!this.rating) this.errors.push("Rating required.")
             }
         }
     }
 })
+Vue.component('product-tabs', {
+    props: {
+        reviews: {
+            type: Array,
+            required: false
+        },
+        premium: {
+            type: Boolean,
+            required: true
+        },
+        details: {
+            type: Array,
+            required: true
+        },
+        product: {
+            type: String,
+            required: true
+        },
+        brand: {
+            type: String,
+            required: true
+        },
+        variants: {
+            type: Array,
+            required: true
+        }
+    },
+    template: `
+    <div class="product-tabs">   
+        <ul class="tab-container">
+            <span class="tab"
+                :class="{ activeTab: selectedTab === tab }"
+                v-for="(tab, index) in tabs"
+                @click="selectedTab = tab"
+            >{{ tab }}</span>
+        </ul>
+        
+        <!-- Вкладка с отзывами -->
+        <div v-show="selectedTab === 'Reviews'" class="tab-content">
+            <h3>Customer Reviews</h3>
+            <p v-if="!reviews.length">There are no reviews yet.</p>
+            <ul v-else>
+                <li v-for="review in reviews" class="review-item">
+                    <p><strong>{{ review.name }}</strong></p>
+                    <p>Rating: {{ review.rating }}/5</p>
+                    <p>{{ review.review }}</p>
+                </li>
+            </ul>
+        </div>
+        
+        <!-- Вкладка с формой -->
+        <div v-show="selectedTab === 'Make a Review'" class="tab-content">
+            <h3>Write a Review</h3>
+            <product-review></product-review>
+        </div>
+        
+        <!-- Новая вкладка Shipping -->
+        <div v-show="selectedTab === 'Shipping'" class="tab-content">
+            <h3>Shipping Information</h3>
+            <div class="shipping-info">
+                <p><strong>Delivery Options:</strong></p>
+                <ul>
+                    <li>Standard Shipping (3-5 business days) - {{ shippingCost }}</li>
+                    <li>Express Shipping (1-2 business days) - {{ expressShippingCost }}</li>
+                    <li>Next Day Delivery - {{ nextDayShippingCost }}</li>
+                </ul>
+            </div>
+        </div>
+        <div v-show="selectedTab === 'Details'" class="tab-content">
+            <h3>Product Details</h3>
+            <div class="product-details">
+                <p><strong>Product:</strong> {{ product }}</p>
+                <p><strong>Brand:</strong> {{ brand }}</p>
+                <p><strong>Available Colors:</strong></p>
+                <div class="color-swatches">
+                    <div v-for="variant in variants" 
+                         class="color-swatch"
+                         :style="{ backgroundColor: variant.variantColor }"
+                         :title="variant.variantColor">
+                    </div>
+                </div>
+                <p><strong>Materials:</strong></p>
+                <ul>
+                    <li v-for="detail in details">{{ detail }}</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+    `,
+    data() {
+        return {
+            tabs: ['Reviews', 'Make a Review', 'Shipping', 'Details'],
+            selectedTab: 'Reviews'
+        }
+    },
+    computed: {
+        shippingCost() {
+            return this.premium ? "Free" : "$2.99";
+        },
+        expressShippingCost() {
+            return this.premium ? "$4.99" : "$7.99";
+        },
+        nextDayShippingCost() {
+            return this.premium ? "$9.99" : "$14.99";
+        }
+    }
+});
+
 
 Vue.component('product', {
     props: {
@@ -115,17 +213,14 @@ Vue.component('product', {
            </button>    
        </div>           
        <div>
-            <h2>Reviews</h2>
-            <p v-if="!reviews.length">There are no reviews yet.</p>
-            <ul>
-              <li v-for="review in reviews">
-              <p>{{ review.name }}</p>
-              <p>Rating: {{ review.rating }}</p>
-              <p>{{ review.review }}</p>
-              <p>{{ review.recommended}}</p>
-              </li>
-            </ul>
-           </div> <product-review @review-submitted="addReview"></product-review>
+           <product-tabs 
+            :reviews="reviews"
+            :premium="premium"
+            :details="details"
+            :product="product"
+            :brand="brand"
+            :variants="variants">
+        </product-tabs>
        </div>
  `,
     data() {
@@ -181,8 +276,14 @@ Vue.component('product', {
                 return 2.99
             }
         }
+    },
+    mounted(){
+        eventBus.$on('review-submitted', productReview => {
+            this.reviews.push(productReview);
+        });
     }
 })
+
 let app = new Vue({
     el: '#app',
     data: {
@@ -195,3 +296,5 @@ let app = new Vue({
         }
     }
 })
+
+
