@@ -173,8 +173,8 @@ Vue.component('product', {
         }
     },
     template: `
-   <div class="product">
-    <div class="product-image">
+    <div class="product">
+       <div class="product-image">
            <img :src="image" :alt="altText"/>
        </div>
 
@@ -191,13 +191,13 @@ Vue.component('product', {
                <li v-for="detail in details">{{ detail }}</li>
            </ul>
            <p>Shipping: {{ shipping }}</p>
-           <div
+           <div>
                    class="color-box"
                    v-for="(variant, index) in variants"
                    :key="variant.variantId"
                    :style="{ backgroundColor:variant.variantColor }"
                    @mouseover="updateProduct(index)"
-           ></div>
+           </div>
           
 
            <button
@@ -212,10 +212,9 @@ Vue.component('product', {
            <ul>
                 <li v-for="size in sizes">{{ size }}</li>
            </ul>
-
-       
        </div>
-       <div>
+    </div>   
+    <div>
        <product-tabs 
             :reviews="reviews"
             :premium="premium"
@@ -251,7 +250,7 @@ Vue.component('product', {
                 }
             ],
             sizes: ['S', 'M', 'L', 'XL', 'XXL', 'XXXL'],
-            reviews:[]
+            reviews: []
         }
     },
     methods: {
@@ -293,7 +292,7 @@ Vue.component('product', {
             }
         }
     },
-    mounted(){
+    mounted() {
         eventBus.$on('review-submitted', productReview => {
             this.reviews.push(productReview);
         });
