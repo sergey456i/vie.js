@@ -184,6 +184,8 @@ Vue.component('product', {
        <div class="product-info">
            <h1>{{ title }}</h1>
            <p>{{description}}</p>
+           <p><strong>Цена:</strong> {{ price }} ₽</p>
+           <p><strong>Материал:</strong> {{ materialInfo }}</p>
            <span v-if="onSale">On sale</span>
            <span v-else></span><br>
            <a  v-bind:href="link">More products like this</a>
@@ -244,15 +246,23 @@ Vue.component('product', {
                     variantId: 2234,
                     variantColor: 'green',
                     variantImage: "./assets/vmSocks-green-onWhite.jpg",
-                    variantQuantity: 10
+                    variantQuantity: 10,
+                    material: 'пластик',
+                    startPrice: 500
                 },
                 {
                     variantId: 2235,
                     variantColor: 'blue',
                     variantImage: "./assets/vmSocks-blue-onWhite.jpg",
-                    variantQuantity: 0
+                    variantQuantity: 0,
+                    material: 'ткань',
+                    startPrice: 800
                 }
             ],
+            coefficient: {
+                'ткань': 1.35,
+                'пластик': 1.15,
+            },
             sizes: ['S', 'M', 'L', 'XL', 'XXL', 'XXXL'],
             reviews: []
         }
@@ -294,6 +304,21 @@ Vue.component('product', {
             } else {
                 return 2.99
             }
+        },
+        price() {
+            let variant = this.variants[this.selectedVariant];
+            let material = variant.material;
+            let startPrice = variant.startPrice;
+            let coefficient = this.coefficient[material] || 1.0;
+
+            return (startPrice * coefficient);
+        },
+        materialInfo() {
+            let variant = this.variants[this.selectedVariant];
+            let material = variant.material;
+            let coefficient = this.coefficient[material] || 1.0;
+
+            return `${material} (Коэффициент: ${coefficient})`;
         }
     },
     mounted() {
